@@ -50,6 +50,11 @@ int SlaveCnt = 0;
 #define CHANNEL 3
 #define PRINTSCANRESULTS 0
 
+//variables for non-blocking loop
+int period = 1000;
+unsigned long time_now = 0;
+
+
 // Init ESP Now with fallback
 void InitESPNow() {
   WiFi.disconnect();
@@ -219,21 +224,31 @@ void setup() {
 }
 
 void loop() {
-  // In the loop we scan for slave
+   
+//***********************************************************
+//START of non-blocking loop, where we scan and manage slaves
+//***********************************************************   
+ time_now = millis();
+ while(millis() < time_now + period){
+        //wait approx. [period] ms
+  //first scan for slaves
   ScanForSlave();
-  // If Slave is found, it would be populate in `slave` variable
+  // If a slave is found, it would be populate in `slave` variable
   // We will check if `slave` is defined and then we proceed further
   if (SlaveCnt > 0) { // check if slave channel is defined
     // `slave` is defined
     // Add slave as peer if it has not been added already
     manageSlave();
     // pair success or already paired
-    // Send data to device
-    sendData();
   } else {
     // No slave found to process
-  }
+  }   
+ }
+ //END of non-blocking loop 
+ //*************************************************************
 
-  // wait for 3seconds to run the logic again
-  delay(1000);
+   
+
+   
+   
 }
